@@ -1,11 +1,14 @@
 from collections import namedtuple, defaultdict
+from typing import Generator
+
 import time
-import typing
 
 Cell = namedtuple("Cell", ["x", "y"])
 
 
 class BoardRule:
+    """Abstract class for all board rules"""
+
     def populateNext(self, board: set) -> dict:
         pass
 
@@ -19,7 +22,7 @@ class ClassicalRule(BoardRule):
                 new_board.add(cell)
         return new_board
 
-    def getNeighbors(self, cell: Cell):
+    def getNeighbors(self, cell: Cell) -> Generator[Cell, None, None]:
         """Create generator for all neighbors of a cell"""
         for x in range(cell.x - 1, cell.x + 2):
             for y in range(cell.y - 1, cell.y + 2):
@@ -44,7 +47,8 @@ class LateralNeighborRule(BoardRule):
                 new_board.add(cell)
         return new_board
 
-    def getLateralNeighbors(self, cell: Cell):
+    def getLateralNeighbors(self, cell: Cell) -> Generator[Cell, None, None]:
+        """Returns a generator for relevant lateral neighbors for a cell"""
         for x in range(cell.x - 1, cell.x + 2):
             if x == cell.x - 1 or x == cell.x + 1:
                 yield Cell(x, cell.y)
@@ -64,7 +68,7 @@ def advanceBoard(board: set, rule: BoardRule) -> set:
     return new_board
 
 
-def generateBoard(start_state: str):
+def generateBoard(start_state: str) -> set:
     """Generate a board as defined by a starting state"""
     board: set = set()
     for row, line in enumerate(start_state.split("\n")):
@@ -74,7 +78,7 @@ def generateBoard(start_state: str):
     return board
 
 
-def boardToString(board: set, pad: int = 0):
+def boardToString(board: set, pad: int = 0) -> str:
     """Generate a printable representation of the board"""
     if not board:
         return "empty"
@@ -91,11 +95,12 @@ def boardToString(board: set, pad: int = 0):
 if __name__ == "__main__":
     f = generateBoard("......X.\nXX......\n.X...XXX")
     rule1 = ClassicalRule()
-    rule2 = LateralNeighborRule()
+    #rule2 = LateralNeighborRule()
     for _ in range(100):
         print("\033[2J\033[1;1H" + boardToString(f))
         print('')
         f1 = advanceBoard(f, rule1)
-        f2 = advanceBoard(f, rule2)
-        f = set.union(f1, f2)
+        #f2 = advanceBoard(f, rule2)
+        #f = set.union(f1, f2)
+        f = f1
         time.sleep(0.1)
